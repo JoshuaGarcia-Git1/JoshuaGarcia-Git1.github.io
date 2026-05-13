@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Joshua B. García — Desarrollador de Sistemas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&family=Space+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #070707;
+      --ink: #0e0e0e;
+      --panel: #111;
+      --line: #1c1c1c;
+      --red: #e8192c;
+      --red2: #ff2d3f;
+      --dim: #8a0f1a;
+      --white: #f2f2f0;
+      --muted: #5a5a5a;
+      --light: #9a9a9a;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CURSOR ── */
+    #cur { width:6px; height:6px; background:var(--red); border-radius:50%; position:fixed; top:0; left:0; pointer-events:none; z-index:9999; mix-blend-mode:screen; transition:transform .08s; }
+    #cur-r { width:28px; height:28px; border:1px solid rgba(232,25,44,.3); border-radius:50%; position:fixed; top:0; left:0; pointer-events:none; z-index:9998; transition:width .2s,height .2s,border-color .2s; }
+
+    /* ── GRAIN ── */
+    body::before {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:9990;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)' opacity='.03'/%3E%3C/svg%3E");
+    }
+
+    /* ── NAV ── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:400;
+      padding:20px 48px;
+      display:flex; justify-content:space-between; align-items:center;
+      background:linear-gradient(to bottom, rgba(7,7,7,.97) 60%, transparent);
+    }
+    .logo {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:1.25rem; letter-spacing:.18em;
+    }
+    .logo b { color:var(--red); font-weight:400; }
+    .nav-r { display:flex; gap:36px; align-items:center; }
+    .nav-r a {
+      font-family:'Space Mono',monospace;
+      font-size:.6rem; letter-spacing:.18em; text-transform:uppercase;
+      color:var(--muted); text-decoration:none; transition:color .2s;
+    }
+    .nav-r a:hover { color:var(--red); }
+    .nav-cta {
+      font-family:'Space Mono',monospace;
+      font-size:.6rem; letter-spacing:.14em; text-transform:uppercase;
+      color:var(--white); text-decoration:none;
+      border:1px solid var(--line);
+      padding:8px 18px;
+      transition:border-color .2s, color .2s;
+    }
+    .nav-cta:hover { border-color:var(--red); color:var(--red); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      position:relative; overflow:hidden;
+    }
+    .hero-left {
+      padding:140px 48px 80px;
+      display:flex; flex-direction:column; justify-content:flex-end;
+      border-right:1px solid var(--line);
+      position:relative; z-index:2;
+    }
+    .hero-right {
+      position:relative; overflow:hidden;
+    }
+    .hero-right-img {
+      position:absolute; inset:0;
+      background:var(--ink);
+      overflow:hidden;
+    }
+    .hero-right-img img {
+      width:100%; height:100%;
+      object-fit:cover;
+      opacity:.35;
+      filter:grayscale(20%);
+      transition:opacity .4s, transform 6s ease;
+    }
+    .hero-right-img:hover img { opacity:.5; transform:scale(1.03); }
+    .hero-right-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(135deg, rgba(7,7,7,.6) 0%, transparent 60%);
+    }
+    .hero-right-label {
+      position:absolute; bottom:40px; right:40px;
+      font-family:'Space Mono',monospace;
+      font-size:.6rem; letter-spacing:.2em; text-transform:uppercase;
+      color:var(--red);
+      writing-mode:vertical-rl;
+    }
+
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:10px;
+      font-family:'Space Mono',monospace;
+      font-size:.58rem; letter-spacing:.22em; text-transform:uppercase;
+      color:var(--red); margin-bottom:32px;
+      opacity:0; animation:fadeup .7s .1s forwards;
+    }
+    .hero-badge::before { content:''; width:24px; height:1px; background:var(--red); }
+
+    .hero-h1 {
+      font-family:'DM Serif Display',serif;
+      font-size:clamp(48px,5.5vw,86px);
+      line-height:1.02;
+      font-weight:400;
+      letter-spacing:-.01em;
+      opacity:0; animation:fadeup .7s .25s forwards;
+    }
+    .hero-h1 em { font-style:italic; color:var(--red); }
+
+    .hero-desc {
+      margin-top:28px;
+      font-size:.95rem; color:var(--light);
+      line-height:1.8; max-width:400px;
+      opacity:0; animation:fadeup .7s .4s forwards;
+    }
+
+    .hero-meta {
+      margin-top:36px;
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:0;
+      border-top:1px solid var(--line);
+      opacity:0; animation:fadeup .7s .5s forwards;
+    }
+    .hero-meta-item {
+      padding:16px 0;
+      border-bottom:1px solid var(--line);
+    }
+    .hero-meta-item:nth-child(odd) { border-right:1px solid var(--line); padding-right:24px; }
+    .hero-meta-item:nth-child(even) { padding-left:24px; }
+    .hmi-label {
+      font-family:'Space Mono',monospace;
+      font-size:.55rem; letter-spacing:.16em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:4px;
+    }
+    .hmi-val { font-size:.88rem; color:var(--white); font-weight:500; }
+
+    .hero-actions {
+      margin-top:36px; display:flex; gap:16px; align-items:center;
+      opacity:0; animation:fadeup .7s .6s forwards;
+    }
+    .btn-fill {
+      background:var(--red); color:var(--white);
+      padding:12px 28px;
+      font-family:'DM Sans',sans-serif;
+      font-size:.82rem; font-weight:500; letter-spacing:.05em;
+      text-decoration:none; display:inline-block;
+      transition:background .2s, transform .15s;
+    }
+    .btn-fill:hover { background:var(--red2); transform:translateY(-2px); }
+    .btn-ghost2 {
+      font-family:'Space Mono',monospace;
+      font-size:.6rem; letter-spacing:.12em; text-transform:uppercase;
+      color:var(--light); text-decoration:none;
+      border-bottom:1px solid var(--muted); padding-bottom:2px;
+      transition:color .2s, border-color .2s;
+    }
+    .btn-ghost2:hover { color:var(--white); border-color:var(--white); }
+
+    /* ── TICKER ── */
+    .ticker { border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:18px 0; overflow:hidden; }
+    .ticker-inner { display:flex; gap:56px; width:max-content; animation:tick 28s linear infinite; }
+    .t-item {
+      font-family:'Space Mono',monospace;
+      font-size:.65rem; letter-spacing:.14em; text-transform:uppercase;
+      color:var(--muted); white-space:nowrap;
+      display:flex; align-items:center; gap:14px;
+    }
+    .t-item::before { content:'◆'; color:var(--red); font-size:.4rem; }
+    @keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* ── SECTION SHARED ── */
+    .s-label {
+      font-family:'Space Mono',monospace;
+      font-size:.58rem; letter-spacing:.25em; text-transform:uppercase;
+      color:var(--red); display:flex; align-items:center; gap:14px;
+      margin-bottom:56px;
+    }
+    .s-label::after { content:''; width:40px; height:1px; background:var(--dim); }
+
+    /* ── PROJECTS ── */
+    #proyectos { padding:100px 0; }
+
+    .proj-intro {
+      padding:0 48px 64px;
+      display:flex; justify-content:space-between; align-items:flex-end;
+    }
+    .proj-intro-title {
+      font-family:'DM Serif Display',serif;
+      font-size:clamp(40px,4.5vw,72px);
+      line-height:1.0; font-weight:400;
+    }
+    .proj-intro-title em { font-style:italic; color:var(--red); }
+    .proj-intro-note {
+      font-size:.85rem; color:var(--light);
+      max-width:280px; line-height:1.7; text-align:right;
+    }
+
+    /* Project 1 — full width hero layout */
+    .proj-hero {
+      border-top:1px solid var(--line);
+      display:grid; grid-template-columns:1fr 1.4fr;
+    }
+    .proj-hero-info {
+      padding:60px 48px;
+      border-right:1px solid var(--line);
+      display:flex; flex-direction:column; justify-content:space-between;
+    }
+    .proj-num {
+      font-family:'Space Mono',monospace;
+      font-size:.58rem; color:var(--red); letter-spacing:.2em;
+      margin-bottom:40px;
+    }
+    .proj-title {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(52px,5vw,80px);
+      letter-spacing:.04em; line-height:.95;
+      margin-bottom:12px;
+    }
+    .proj-sub {
+      font-family:'Space Mono',monospace;
+      font-size:.6rem; letter-spacing:.14em; text-transform:uppercase;
+      color:var(--red); margin-bottom:28px;
+    }
+    .proj-desc {
+      font-size:.88rem; color:var(--light);
+      line-height:1.82; margin-bottom:28px;
+    }
+    .proj-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:40px; }
+    .tag {
+      font-family:'Space Mono',monospace;
+      font-size:.55rem; letter-spacing:.1em; text-transform:uppercase;
+      padding:4px 10px;
+      border:1px solid var(--line); color:var(--muted);
+      transition:border-color .2s, color .2s;
+    }
+    .proj-hero:hover .tag { border-color:#2a2a2a; color:var(--light); }
+
+    .proj-screens {
+      position:relative; overflow:hidden;
+      background:var(--ink);
+      min-height:480px;
+    }
+    /* Stacked screenshot collage */
+    .screen-collage {
+      position:absolute; inset:0;
+      padding:32px;
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .screen-main {
+      border-radius:4px; overflow:hidden;
+      border:1px solid #222;
+      flex:1;
+      position:relative;
+    }
+    .screen-main img {
+      width:100%; height:100%;
+      object-fit:cover; object-position:top;
+      transition:transform .6s ease;
+    }
+    .proj-screens:hover .screen-main img { transform:scale(1.03); }
+    .screen-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; height:160px; }
+    .screen-sm {
+      border-radius:4px; overflow:hidden;
+      border:1px solid #222;
+    }
+    .screen-sm img { width:100%; height:100%; object-fit:cover; object-position:top; }
+    .screen-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(to top, rgba(7,7,7,.7) 0%, transparent 40%);
+      pointer-events:none;
+    }
+
+    /* Project 2 — side by side with diagrams */
+    .proj-secondary {
+      border-top:1px solid var(--line);
+      display:grid; grid-template-columns:1.4fr 1fr;
+    }
+    .proj-diagrams {
+      background:var(--ink);
+      padding:40px;
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:12px; align-content:start;
+      border-right:1px solid var(--line);
+    }
+    .diag-box {
+      border:1px solid #1e1e1e;
+      overflow:hidden;
+      border-radius:3px;
+    }
+    .diag-box img {
+      width:100%; display:block;
+      filter:brightness(.9) contrast(1.05);
+      transition:filter .3s, transform .4s;
+    }
+    .diag-box:hover img { filter:brightness(1.05); transform:scale(1.04); }
+    .diag-box.span2 { grid-column:span 2; }
+    .proj-secondary-info {
+      padding:60px 48px;
+      display:flex; flex-direction:column; justify-content:space-between;
+    }
+
+    /* ── ABOUT ── */
+    #sobre {
+      border-top:1px solid var(--line);
+      display:grid; grid-template-columns:1fr 1fr;
+    }
+    .about-left {
+      padding:80px 48px;
+      border-right:1px solid var(--line);
+    }
+    .about-headline {
+      font-family:'DM Serif Display',serif;
+      font-size:clamp(38px,4vw,64px);
+      line-height:1.05; font-weight:400;
+      margin-bottom:32px;
+    }
+    .about-headline em { font-style:italic; color:var(--red); }
+    .about-p { font-size:.9rem; color:var(--light); line-height:1.85; margin-bottom:16px; }
+    .avail-block {
+      margin-top:40px;
+      padding:24px;
+      border:1px solid var(--line);
+      display:grid; grid-template-columns:auto 1fr; gap:16px 24px; align-items:center;
+    }
+    .avail-dot { width:8px; height:8px; border-radius:50%; background:var(--red); grid-row:span 2; animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,25,44,.4)} 50%{box-shadow:0 0 0 6px rgba(232,25,44,0)} }
+    .avail-t { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:.06em; }
+    .avail-sub { font-family:'Space Mono',monospace; font-size:.58rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+
+    .stats-row { display:grid; grid-template-columns:repeat(4,1fr); margin-top:48px; }
+    .stat-box {
+      padding:24px 0;
+      border-top:1px solid var(--line);
+      border-right:1px solid var(--line);
+    }
+    .stat-box:last-child { border-right:none; }
+    .stat-n { font-family:'Bebas Neue',sans-serif; font-size:2.8rem; color:var(--red); line-height:1; }
+    .stat-l { font-family:'Space Mono',monospace; font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+
+    .about-right { padding:80px 48px; }
+    .svc-title {
+      font-family:'DM Serif Display',serif;
+      font-size:1.4rem; font-weight:400; font-style:italic;
+      color:var(--light); margin-bottom:40px;
+    }
+    .svc-list { display:flex; flex-direction:column; }
+    .svc-row {
+      display:flex; justify-content:space-between; align-items:baseline;
+      padding:18px 0; border-bottom:1px solid var(--line);
+      transition:padding-left .25s;
+    }
+    .svc-row:hover { padding-left:10px; }
+    .svc-row:hover .svc-n { color:var(--white); }
+    .svc-row:hover .svc-p { color:var(--red); }
+    .svc-n { font-size:.92rem; font-weight:400; color:var(--light); transition:color .2s; }
+    .svc-p { font-family:'Space Mono',monospace; font-size:.68rem; color:var(--muted); transition:color .2s; }
+
+    /* ── CONTACT ── */
+    #contacto {
+      border-top:1px solid var(--line);
+      padding:100px 48px;
+      position:relative; overflow:hidden;
+    }
+    .contact-bg-text {
+      position:absolute;
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(120px,18vw,260px);
+      color:transparent;
+      -webkit-text-stroke:1px rgba(232,25,44,.05);
+      right:-20px; top:50%; transform:translateY(-50%);
+      pointer-events:none; user-select:none; letter-spacing:-.02em;
+      line-height:1;
+    }
+    .contact-inner { max-width:600px; }
+    .contact-h {
+      font-family:'DM Serif Display',serif;
+      font-size:clamp(44px,5vw,80px);
+      line-height:1.0; font-weight:400;
+      margin-bottom:24px;
+    }
+    .contact-h em { font-style:italic; color:var(--red); }
+    .contact-sub { font-size:.95rem; color:var(--light); line-height:1.7; margin-bottom:48px; }
+    .contact-btns { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:40px; }
+    .cbtn {
+      display:inline-flex; align-items:center; gap:10px;
+      padding:13px 26px;
+      font-family:'Space Mono',monospace;
+      font-size:.65rem; letter-spacing:.1em; text-transform:uppercase;
+      text-decoration:none; transition:all .2s;
+    }
+    .cbtn.fill { background:var(--red); color:var(--white); border:1px solid var(--red); }
+    .cbtn.fill:hover { background:var(--red2); transform:translateY(-2px); }
+    .cbtn.outline { border:1px solid var(--line); color:var(--light); }
+    .cbtn.outline:hover { border-color:var(--light); color:var(--white); transform:translateY(-2px); }
+    .contact-detail {
+      font-family:'Space Mono',monospace;
+      font-size:.6rem; letter-spacing:.14em; text-transform:uppercase;
+      color:var(--muted); line-height:2;
+    }
+    .contact-detail a { color:var(--light); text-decoration:none; transition:color .2s; }
+    .contact-detail a:hover { color:var(--red); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top:1px solid var(--line);
+      padding:24px 48px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    footer p { font-family:'Space Mono',monospace; font-size:.56rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+    footer b { color:var(--red); font-weight:400; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeup { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    .r { opacity:0; transform:translateY(20px); transition:opacity .65s ease, transform .65s ease; }
+    .r.in { opacity:1; transform:none; }
+
+    /* ── MOBILE ── */
+    @media(max-width:900px){
+      nav { padding:18px 24px; }
+      .nav-r a { display:none; }
+      .hero { grid-template-columns:1fr; }
+      .hero-left { padding:100px 24px 60px; }
+      .hero-right { height:280px; }
+      #proyectos { padding:72px 0; }
+      .proj-intro, .proj-hero-info, .proj-secondary-info, .about-left, .about-right, #contacto { padding-left:24px; padding-right:24px; }
+      .proj-hero, .proj-secondary { grid-template-columns:1fr; }
+      .proj-screens { min-height:260px; }
+      .proj-diagrams { grid-template-columns:1fr; border-right:none; border-bottom:1px solid var(--line); }
+      .diag-box.span2 { grid-column:span 1; }
+      #sobre { grid-template-columns:1fr; }
+      .about-left { border-right:none; border-bottom:1px solid var(--line); }
+      .stats-row { grid-template-columns:1fr 1fr; }
+      footer { flex-direction:column; gap:10px; text-align:center; }
+      .contact-btns { flex-direction:column; }
+      .proj-intro { flex-direction:column; gap:20px; }
+      .proj-intro-note { text-align:left; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">JOSHUA<b>.</b>DEV</div>
+  <div class="nav-r">
+    <a href="#proyectos">Proyectos</a>
+    <a href="#sobre">Servicios</a>
+    <a href="#contacto" class="nav-cta">Contacto</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="hero-badge">Desarrollador de Sistemas · Paraguay</p>
+    <h1 class="hero-h1">
+      Joshua<br>
+      Benjamín<br>
+      <em>García.</em>
+    </h1>
+    <p class="hero-desc">
+      Diseño y desarrollo sistemas web y bases de datos a medida.
+      Código sin frameworks innecesarios, seguro, limpio y entregado a tiempo.
+    </p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="hmi-label">Experiencia</div>
+        <div class="hmi-val">2 años</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hmi-label">Disponible</div>
+        <div class="hmi-val">07:00 – 15:00</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hmi-label">Stack principal</div>
+        <div class="hmi-val">PHP · MySQL · JS</div>
+      </div>
+      <div class="hero-meta-item">
+        <div class="hmi-label">Ubicación</div>
+        <div class="hmi-val">Asunción, PY</div>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <a href="#proyectos" class="btn-fill">Ver proyectos</a>
+      <a href="#contacto" class="btn-ghost2">Hablemos →</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-right-img">
+      <img src="img/dashboard.webp" alt="GestorPro Dashboard" fetchpriority="high"/>
+    </div>
+    <div class="hero-right-overlay"></div>
+    <div class="hero-right-label">GestorPro · Dashboard</div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="t-item">PHP</span>
+    <span class="t-item">MySQL</span>
+    <span class="t-item">JavaScript</span>
+    <span class="t-item">HTML & CSS</span>
+    <span class="t-item">Java OOP</span>
+    <span class="t-item">StarUML</span>
+    <span class="t-item">Diseño de BD</span>
+    <span class="t-item">XAMPP</span>
+    <span class="t-item">Normalización 3NF</span>
+    <span class="t-item">Autenticación Segura</span>
+    <span class="t-item">Bcrypt</span>
+    <span class="t-item">PHP</span>
+    <span class="t-item">MySQL</span>
+    <span class="t-item">JavaScript</span>
+    <span class="t-item">HTML & CSS</span>
+    <span class="t-item">Java OOP</span>
+    <span class="t-item">StarUML</span>
+    <span class="t-item">Diseño de BD</span>
+    <span class="t-item">XAMPP</span>
+    <span class="t-item">Normalización 3NF</span>
+    <span class="t-item">Autenticación Segura</span>
+    <span class="t-item">Bcrypt</span>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<section id="proyectos">
+  <div class="proj-intro r">
+    <h2 class="proj-intro-title">Proyectos<br><em>reales.</em></h2>
+    <p class="proj-intro-note">Dos sistemas desarrollados desde cero. Sin plantillas, sin atajos.</p>
+  </div>
+
+  <!-- GESTORPRO -->
+  <div class="proj-hero r">
+    <div class="proj-hero-info">
+      <div>
+        <p class="proj-num">// 001</p>
+        <h3 class="proj-title">GESTORPRO</h3>
+        <p class="proj-sub">Sistema de Gestión Comercial</p>
+        <p class="proj-desc">
+          Sistema web completo para una tienda de ropa y accesorios. Gestiona inventario,
+          registra ventas, administra empleados y controla acceso por roles diferenciados.
+        </p>
+        <p class="proj-desc">
+          Construido en PHP puro con MySQL sobre XAMPP. Autenticación con cifrado bcrypt,
+          protección contra SQL injection y XSS, dashboard con gráficos de ventas en tiempo
+          real y precios en guaraníes paraguayos. Cero frameworks externos.
+        </p>
+        <div class="proj-tags">
+          <span class="tag">PHP</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">XAMPP</span>
+          <span class="tag">bcrypt</span>
+          <span class="tag">Roles & Auth</span>
+          <span class="tag">Anti-XSS</span>
+          <span class="tag">Anti-SQLi</span>
+        </div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">
+        Sistema local · XAMPP · PHP 8+
+      </div>
+    </div>
+    <div class="proj-screens">
+      <div class="screen-collage">
+        <div class="screen-main">
+          <img src="img/dashboard.webp" alt="Dashboard GestorPro" loading="lazy"/>
+        </div>
+        <div class="screen-row">
+          <div class="screen-sm"><img src="img/login.webp" alt="Login GestorPro" loading="lazy"/></div>
+          <div class="screen-sm"><img src="img/stock.webp" alt="Stock GestorPro" loading="lazy"/></div>
+        </div>
+      </div>
+      <div class="screen-overlay"></div>
+    </div>
+  </div>
+
+  <!-- GALLO CLAUDIO -->
+  <div class="proj-secondary r">
+    <div class="proj-diagrams">
+      <div class="diag-box span2"><img src="img/uml-ventas.webp" alt="UML Ventas" loading="lazy"/></div>
+      <div class="diag-box"><img src="img/uml-inventario.webp" alt="UML Inventario" loading="lazy"/></div>
+      <div class="diag-box"><img src="img/uml-compras.webp" alt="UML Compras" loading="lazy"/></div>
+    </div>
+    <div class="proj-secondary-info">
+      <div>
+        <p class="proj-num">// 002</p>
+        <h3 class="proj-title">EL GALLO<br>CLAUDIO</h3>
+        <p class="proj-sub">Base de Datos Relacional & OO</p>
+        <p class="proj-desc">
+          Diseño completo de base de datos para una pollería. Modelo relacional
+          normalizado a Tercera Forma Normal (3NF) con análisis de dependencias
+          funcionales y justificación de cada decisión de diseño.
+        </p>
+        <p class="proj-desc">
+          Incluye diagramas UML de clases orientados a objetos para módulos de
+          ventas, compras, inventario y empleados. Documentación técnica estructurada
+          para defensa académica formal.
+        </p>
+        <div class="proj-tags">
+          <span class="tag">StarUML</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">3NF</span>
+          <span class="tag">UML</span>
+          <span class="tag">OO Design</span>
+          <span class="tag">Normalización</span>
+        </div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:32px;">
+        Proyecto académico · DB II · 2025
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT + SERVICES -->
+<section id="sobre">
+  <div class="about-left r">
+    <div class="s-label">Sobre mí</div>
+    <h2 class="about-headline">
+      Código real<br>para negocios<br><em>reales.</em>
+    </h2>
+    <p class="about-p">
+      Soy Joshua Benjamín García Urbieta, estudiante de Sistemas en Paraguay
+      con 2 años desarrollando software. Me especializo en sistemas de gestión
+      web y bases de datos relacionales diseñadas para negocios locales.
+    </p>
+    <p class="about-p">
+      Trabajo con PHP, MySQL, HTML, CSS y JavaScript sin frameworks innecesarios.
+      Código limpio, seguro y fácil de mantener — y entregado en el tiempo acordado.
+    </p>
+    <div class="avail-block r">
+      <div class="avail-dot"></div>
+      <div class="avail-t">07:00 — 15:00</div>
+      <div class="avail-sub">Lunes a viernes · PYT (GMT−4)</div>
+    </div>
+    <div class="stats-row r">
+      <div class="stat-box">
+        <div class="stat-n">2+</div>
+        <div class="stat-l">Años codificando</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-n">2</div>
+        <div class="stat-l">Sistemas completos</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-n">3NF</div>
+        <div class="stat-l">Normalización</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-n">0</div>
+        <div class="stat-l">Frameworks extra</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="about-right r">
+    <div class="s-label">Servicios</div>
+    <p class="svc-title">¿Qué puedo hacer por tu negocio?</p>
+    <div class="svc-list">
+      <div class="svc-row"><span class="svc-n">Landing page / Sitio web</span><span class="svc-p">desde $50 USD</span></div>
+      <div class="svc-row"><span class="svc-n">Sistema de inventario</span><span class="svc-p">desde $150 USD</span></div>
+      <div class="svc-row"><span class="svc-n">Registro de clientes / ventas</span><span class="svc-p">desde $100 USD</span></div>
+      <div class="svc-row"><span class="svc-n">Web + sistema integrado</span><span class="svc-p">desde $200 USD</span></div>
+      <div class="svc-row"><span class="svc-n">Diseño de base de datos</span><span class="svc-p">desde $80 USD</span></div>
+      <div class="svc-row"><span class="svc-n">Consultoría técnica</span><span class="svc-p">a convenir</span></div>
+    </div>
+    <p style="margin-top:32px;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);line-height:2;">
+      Todos los proyectos incluyen:<br>
+      50% adelantado · Contrato simple · Revisiones incluidas
+    </p>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contacto">
+  <div class="contact-bg-text">CONTACTO</div>
+  <div class="contact-inner">
+    <div class="s-label r">Contacto</div>
+    <h2 class="contact-h r">¿Tenés un<br><em>proyecto?</em></h2>
+    <p class="contact-sub r">
+      Escribime por WhatsApp o email. Respondo en horario de disponibilidad —
+      07:00 a 15:00, de lunes a viernes.
+    </p>
+    <div class="contact-btns r">
+      <a href="https://wa.me/595985103957?text=Hola%20Joshua%2C%20vi%20tu%20portafolio%20y%20me%20interesa%20hablar%20de%20un%20proyecto." target="_blank" class="cbtn fill">📱 WhatsApp</a>
+      <a href="mailto:joshurbieta2@gmail.com" class="cbtn outline">✉ Email</a>
+      <a href="#" class="cbtn outline">⌥ GitHub</a>
+    </div>
+    <div class="contact-detail r">
+      Email — <a href="mailto:joshurbieta2@gmail.com">joshurbieta2@gmail.com</a><br>
+      WhatsApp — <a href="https://wa.me/595985103957" target="_blank">+595 985 103 957</a><br>
+      GitHub — <a href="#">[TU-USUARIO-GITHUB]</a><br>
+      Disponible — 07:00 a 15:00 PYT · Lunes a viernes
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 — <b>Joshua B. García Urbieta</b> — Asunción, Paraguay</p>
+  <p>Desarrollado por <b>Joshua García</b></p>
+</footer>
+
+<script>
+  // CURSOR
+  const cur = document.getElementById('cur');
+  const curR = document.getElementById('cur-r');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => {
+    mx=e.clientX; my=e.clientY;
+    cur.style.transform=`translate(${mx-3}px,${my-3}px)`;
+  });
+  (function loop(){
+    rx+=(mx-rx-14)*.11; ry+=(my-ry-14)*.11;
+    curR.style.transform=`translate(${rx}px,${ry}px)`;
+    requestAnimationFrame(loop);
+  })();
+  document.querySelectorAll('a,button,.proj-hero,.proj-secondary,.svc-row').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ curR.style.width=curR.style.height='48px'; curR.style.borderColor='rgba(232,25,44,.65)'; });
+    el.addEventListener('mouseleave',()=>{ curR.style.width=curR.style.height='28px'; curR.style.borderColor='rgba(232,25,44,.3)'; });
+  });
+
+  // REVEAL
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('in'),i*70); obs.unobserve(e.target); }
+    });
+  },{threshold:.08});
+  document.querySelectorAll('.r').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
